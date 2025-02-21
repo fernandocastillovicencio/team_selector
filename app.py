@@ -4,6 +4,7 @@ import os
 from process import parse_players, normalize_name
 from balance import balance_teams
 from radar_chart import create_radar_chart
+from combine_images import create_combined_image  # Importando a função para combinar imagens
 
 # Carregar base de dados dos jogadores
 df_base = pd.read_csv("data/players.csv")
@@ -22,7 +23,7 @@ st.title("Times da Pelega")
 num_teams = st.radio("Número de Equipes:", [2, 3])
 
 st.subheader("Lista de Jogadores")
-player_input = st.text_area("Cole a lista de jogadores aqui", height=200)
+player_input = st.text_area("Cole a lista de jogadores aqui", height=500)
 
 if st.button("FAZER TIMES"):
     if not player_input.strip():
@@ -53,7 +54,9 @@ if st.button("FAZER TIMES"):
 
         colors = ["red", "blue", "black"]
         image_paths = []
-
+        team_lists = []
+        # ---------------------------------------------------------------------------- #
+        
         for i, team in teams.items():
             team_number = i + 1
 
@@ -64,13 +67,19 @@ if st.button("FAZER TIMES"):
             # Gerar e salvar gráfico de radar do time
             image_path = f"generated/team_{team_number}.png"
             create_radar_chart(team_number, team_data, image_path, color=colors[i])
+            
             image_paths.append(image_path)
+            team_lists.append(team)
 
-            # Exibir o gráfico no Streamlit
-            st.image(image_path, caption=f"Time {team_number}", width=300)
+        # Definir tamanho das figuras (pode ser alterado pelo usuário)
+        fig_size = 520  # Ajustável, aumenta ou diminui todas as imagens
 
-        # Botões para baixar as imagens dos times
-        st.subheader("Baixar Times")
-        for image in image_paths:
-            with open(image, "rb") as file:
-                st.download_button(label=f"Baixar {image}", data=file, file_name=image, mime="image/png")
+        # Criar imagem combinada com listas + radares
+        combined_image_path = "generated/combined_teams.png"
+        create_combined_image(image_paths, team_lists, combined_image_path, fig_size)
+
+        # Exibir a imagem combinada no Streamlit
+        st.image(combined_image_path, caption="Times Formados", width= 900)
+        # Botão para baixar a imagem final
+        with open(combined_image_path, "rb") as file:
+            st.download_button(label="Baixar Imagem dos Times", data=file, file_name="times_combinados.png", mime="image/png")
