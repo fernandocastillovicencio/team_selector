@@ -26,7 +26,7 @@ def create_text_image(players, team_number, fig_size, color):
     except:
         font = ImageFont.load_default()
 
-    title_y = int(fig_size * 0.05)
+    title_y = int(fig_size * 0.06)
     draw.text((width // 4, title_y), f"Time {team_number}", fill=color, font=font)
 
     text_y = title_y + int(fig_size * 0.1)
