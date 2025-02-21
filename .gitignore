@@ -2,3 +2,6 @@ planning/**
 **/*.png
 **/*.pyc
 __pycache__/process.cpython-38.pyc
+**/*.cpython-38.pyc
+*.pyc
+__pycache__/

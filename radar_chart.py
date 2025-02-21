@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import os  # Adicionado para manipulação de diretórios
+import os  
 
 def create_radar_chart(team_number, team_data, save_path, color):
     """
@@ -13,39 +13,33 @@ def create_radar_chart(team_number, team_data, save_path, color):
     - color: Cor principal do gráfico (ex: "red", "blue", "black")
     """
     
-    # ---------------------------------------------------------------------------- #
     categories = ["Físico", "Defesa", "Tática", "Técnica", "Ataque", "Velocidade"]
-    sum = np.pi /6
-    angles = np.linspace(0+sum, 2 * np.pi+sum, len(categories), endpoint=False).tolist()
+    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
     
     # Adiciona o primeiro valor ao final para fechar o gráfico
     values = [team_data[attr] for attr in categories]
     values += values[:1]  # Fechando o ciclo do gráfico
     angles += angles[:1]  # Fechando o ciclo dos ângulos
 
+    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))  # Ajustado tamanho
 
-    size = 2
-    fig, ax = plt.subplots(figsize=(1,1.8), subplot_kw=dict(polar=True))
-    ax.set_position([0, 0, 0, -1]) 
-
-
+    # Preenchendo a área do radar
     ax.fill(angles, values, color=color, alpha=0.3)
-    ax.plot(angles, values, color=color, linewidth=0.1)
+    ax.plot(angles, values, color=color, linewidth=1.5, linestyle="-")  # Linha mais visível
 
     ax.set_ylim(0, 5)  
-    ax.set_yticks([1, 2, 3, 4, 5])  # ✅ Define os níveis da grade circular
+    ax.set_yticks([1, 2, 3, 4, 5])
+    ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=8, color="gray")  
 
-    fontsize = 6
-    # plt.rcParams.update({"ytick.labelsize": fontsize})  
-    ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=fontsize, alpha=1)  # Ajusta o tamanho da fonte
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(categories, fontsize=9, fontweight="bold")
 
-    ax.set_xticks(angles[:-1])  # Definir as posições das categorias no eixo circular
-    ax.set_xticklabels(categories, fontsize=fontsize, fontweight="bold")
+    # Adicionando título
+    ax.set_title(f"Time {team_number}", fontsize=12, fontweight="bold", color=color, pad=15)
 
-    team_name = f"Time {team_number}"
-    # ax.set_title(team_name, color=color, fontsize=14, fontweight="bold", pad=20)
-
-    # 🔹 Criar o diretório "generated" se não existir
+    # Criar diretório se não existir
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    plt.savefig(save_path, bbox_inches="tight", dpi=250)
+    # Salvar gráfico
+    plt.savefig(save_path, bbox_inches="tight", dpi=300)
+    plt.close()

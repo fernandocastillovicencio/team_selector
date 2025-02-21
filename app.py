@@ -3,7 +3,8 @@ import pandas as pd
 from process import parse_players, normalize_name, process_players_in_database
 from balance import balance_teams
 from radar_chart import create_radar_chart
-from combine_images import create_combined_image  
+from combine_images import create_combined_image
+from team_selection import calcular_diferenca_mg  
 
 # 🔹 Configuração da Página
 st.set_page_config(page_title="Times da Pelega", layout="centered")
@@ -43,6 +44,19 @@ if st.button("FAZER TIMES"):
         # 🔹 Balancear os jogadores nos times
         teams = balance_teams(pd.DataFrame(matched_players), num_teams=num_teams)
 
+        # 🔹 Calcular diferença de MG entre os times
+        medias, diff = calcular_diferenca_mg(teams, pd.DataFrame(matched_players))
+
+        # 🔹 Exibir médias de cada time
+        st.subheader("Médias Ponderadas dos Times:")
+        for i, media in enumerate(medias):
+            st.write(f"**Time {i+1}:** {media:.3f}")
+
+        # 🔹 Exibir diferença entre os times
+        st.subheader("Diferença entre as Médias dos Times:")
+        st.write(f"**Diferença Total:** {diff:.3f}")
+
+        # 🔹 Gerar e salvar gráficos radar dos times
         colors = ["red", "blue", "black"]
         image_paths = []
         team_lists = []
