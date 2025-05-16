@@ -1,14 +1,17 @@
-import unicodedata
-import re
 import random
+import re
+import unicodedata
+
 import pandas as pd  # 🔹 Correção: importação do pandas
+
 
 def normalize_name(name):
     """Remove acentos, caracteres especiais e espaços extras, além de padronizar o nome para comparação."""
-    name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode('utf-8')
-    name = re.sub(r'[^a-zA-Z0-9]', '', name)  # Remove caracteres especiais e espaços
+    name = unicodedata.normalize("NFKD", name).encode("ASCII", "ignore").decode("utf-8")
+    name = re.sub(r"[^a-zA-Z0-9]", "", name)  # Remove caracteres especiais e espaços
     name = name.lower().strip()  # Converte para minúsculas
     return name
+
 
 def parse_players(text):
     """
@@ -20,12 +23,12 @@ def parse_players(text):
     lines = text.split("\n")
     mensalistas = []
     avulsos = []
-    section = None  
+    section = None
 
     for line in lines:
         line = line.strip()
         if not line:
-            continue  
+            continue
 
         if "MENSALISTA" in line.upper():
             section = "mensalistas"
@@ -35,7 +38,7 @@ def parse_players(text):
             continue
 
         if section in ["mensalistas", "avulsos"]:
-            match = re.match(r"\d+\-\s*(.+)", line)  
+            match = re.match(r"\d+\-\s*(.+)", line)
             if match:
                 name = match.group(1)
                 normalized_name = normalize_name(name)
@@ -63,10 +66,10 @@ def process_players_in_database(jogadores, df_base):
     - Lista de jogadores não reconhecidos
     """
     matched_players = []
-    unrecognized_players = []  
+    unrecognized_players = []
 
     for player in jogadores:
-        normalized_player = normalize_name(player)  
+        normalized_player = normalize_name(player)
         found = df_base[df_base["Nome"] == normalized_player]
 
         # 🔹 Printar a busca de cada jogador
@@ -74,20 +77,22 @@ def process_players_in_database(jogadores, df_base):
 
         if not found.empty:
             print("ENCONTRADO na base de dados.")
-            matched_players.append(found.iloc[0].to_dict())  
+            matched_players.append(found.iloc[0].to_dict())
         else:
             print("NAO ENCONTRADO. Adicionando com valores padrão.")
             unrecognized_players.append(player)
-            matched_players.append({
-                "Nome": player, 
-                "Técnica": 3, 
-                "Ataque": 3, 
-                "Velocidade": 3,
-                "Físico": 3, 
-                "Defesa": 3, 
-                "Tática": 3,
-                "Pos1": "CM",  
-                "Pos2": "CM"   
-            })
+            matched_players.append(
+                {
+                    "Nome": player.title(),  # Exibe com primeira letra maiúscula
+                    "Técnica": 3,
+                    "Ataque": 3,
+                    "Velocidade": 3,
+                    "Físico": 3,
+                    "Defesa": 3,
+                    "Tática": 3,
+                    "Pos1": "CM",
+                    "Pos2": "CM",
+                }
+            )
 
     return matched_players, unrecognized_players

@@ -1,11 +1,11 @@
-import streamlit as st
-import pandas as pd
 import numpy as np
-from process import parse_players, normalize_name, process_players_in_database
+import pandas as pd
+import streamlit as st
 from balance import balance_teams
-from radar_chart import create_radar_chart
 from combine_images import create_combined_image
-from team_selection import calcular_diferenca_mg  
+from process import normalize_name, parse_players, process_players_in_database
+from radar_chart import create_radar_chart
+from team_selection import calcular_diferenca_mg
 
 # 🔹 Configuração da Página
 st.set_page_config(page_title="Times da Pelega", layout="centered")
@@ -20,7 +20,9 @@ player_input = st.text_area("Cole a lista de jogadores aqui", height=500)
 num_teams = st.radio("Número de Times:", [2, 3])
 
 # 🔹 Definição do número de combinações avaliadas (até 1000)
-num_combinacoes = st.number_input("Número de Times Avaliados (N)", min_value=1, max_value=3000, value=100, step=100)
+num_combinacoes = st.number_input(
+    "Número de Times Avaliados (N)", min_value=1, max_value=3000, value=100, step=100
+)
 
 # 🔹 Botão para formar os times
 if st.button("FAZER TIMES"):
@@ -36,7 +38,9 @@ if st.button("FAZER TIMES"):
         df_base["Nome"] = df_base["Nome"].apply(normalize_name)
 
         # 🔹 Processa a busca na base de dados
-        matched_players, unrecognized_players = process_players_in_database(jogadores, df_base)
+        matched_players, unrecognized_players = process_players_in_database(
+            jogadores, df_base
+        )
 
         # 🔹 Criar DataFrame para armazenar os resultados de todas as combinações
         resultados = []
@@ -54,18 +58,24 @@ if st.button("FAZER TIMES"):
             medias, diff = calcular_diferenca_mg(teams, pd.DataFrame(matched_players))
 
             # Salvar os resultados
-            resultados.append({
-                "Iteração": i + 1,
-                "Times": teams,
-                "Médias": medias,
-                "Diferença MG": diff
-            })
+            resultados.append(
+                {
+                    "Iteração": i + 1,
+                    "Times": teams,
+                    "Médias": medias,
+                    "Diferença MG": diff,
+                }
+            )
 
             # Atualizar se for a melhor combinação
             if diff < melhor_diff:
                 melhor_diff = diff
                 melhor_times = teams
                 melhor_medias = medias
+                # 🔹 Mostrar no terminal os jogadores de cada time
+                print("\nMelhor distribuição de times (terminal):")
+                for i, team in melhor_times.items():
+                    print(f"Time {i + 1}: {', '.join(team)}")
 
             # Atualizar barra de progresso
             progress_bar.progress((i + 1) / num_combinacoes)
@@ -74,7 +84,9 @@ if st.button("FAZER TIMES"):
         df_resultados = pd.DataFrame(resultados)
 
         print("\nResultados das combinações geradas:")
-        print(df_resultados[["Iteração", "Diferença MG"]].head(20))  # Mostrar apenas as 20 primeiras linhas no terminal
+        print(
+            df_resultados[["Iteração", "Diferença MG"]].head(20)
+        )  # Mostrar apenas as 20 primeiras linhas no terminal
 
         # 🔹 Mapeamento de cores
         cores_times = {1: "Vermelho", 2: "Azul", 3: "Preto"}
@@ -98,18 +110,29 @@ if st.button("FAZER TIMES"):
             team_number = i + 1
 
             # 🔹 Calcular média dos atributos para o time
-            team_data = {attr: pd.DataFrame(matched_players)[pd.DataFrame(matched_players)['Nome'].isin(team)][attr].mean() 
-                         for attr in ["Físico", "Defesa", "Tática", "Técnica", "Ataque", "Velocidade"]}
+            team_data = {
+                attr: pd.DataFrame(matched_players)[
+                    pd.DataFrame(matched_players)["Nome"].isin(team)
+                ][attr].mean()
+                for attr in [
+                    "Físico",
+                    "Defesa",
+                    "Tática",
+                    "Técnica",
+                    "Ataque",
+                    "Velocidade",
+                ]
+            }
 
             # 🔹 Gerar e salvar gráfico de radar do time
             image_path = f"generated/team_{team_number}.png"
             create_radar_chart(team_number, team_data, image_path, color=colors[i])
-            
+
             image_paths.append(image_path)
             team_lists.append(team)
 
         # 🔹 Criar imagem combinada com listas + radares
-        fig_size = 520  
+        fig_size = 520
         combined_image_path = "generated/combined_teams.png"
         create_combined_image(image_paths, team_lists, combined_image_path, fig_size)
 
@@ -118,4 +141,9 @@ if st.button("FAZER TIMES"):
 
         # 🔹 Botão para baixar a imagem final
         with open(combined_image_path, "rb") as file:
-            st.download_button(label="Baixar Imagem dos Times", data=file, file_name="times_combinados.png", mime="image/png")
+            st.download_button(
+                label="Baixar Imagem dos Times",
+                data=file,
+                file_name="times_combinados.png",
+                mime="image/png",
+            )

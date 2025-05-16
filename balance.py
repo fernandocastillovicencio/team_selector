@@ -1,8 +1,7 @@
 import random
+
 import pandas as pd
 
-import random
-import pandas as pd
 
 def balance_teams(df_players, num_teams=2):
     """
@@ -18,9 +17,21 @@ def balance_teams(df_players, num_teams=2):
     """
 
     # Separar os jogadores por posição
-    defenders = df_players[df_players["Pos1"].isin(["CB", "LB", "RB"])].sample(frac=1).to_dict(orient="records")
-    midfielders = df_players[df_players["Pos1"].isin(["CM", "CDM", "CAM", "LM", "RM"])].sample(frac=1).to_dict(orient="records")
-    attackers = df_players[df_players["Pos1"].isin(["ST", "LW", "RW"])].sample(frac=1).to_dict(orient="records")
+    defenders = (
+        df_players[df_players["Pos1"].isin(["CB", "LB", "RB"])]
+        .sample(frac=1)
+        .to_dict(orient="records")
+    )
+    midfielders = (
+        df_players[df_players["Pos1"].isin(["CM", "CDM", "CAM", "LM", "RM"])]
+        .sample(frac=1)
+        .to_dict(orient="records")
+    )
+    attackers = (
+        df_players[df_players["Pos1"].isin(["ST", "LW", "RW", "CF"])]
+        .sample(frac=1)
+        .to_dict(orient="records")
+    )
 
     teams = {i: [] for i in range(num_teams)}
 
@@ -49,4 +60,3 @@ def balance_teams(df_players, num_teams=2):
     teams = {key: [player["Nome"] for player in value] for key, value in teams.items()}
 
     return teams
-
